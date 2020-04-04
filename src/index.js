@@ -8,53 +8,49 @@ const getTop = (arr) => {
 }
 
 const calculate = (operation, a, b) => {
-    switch (operation) {
-        case '+': return a + b;
-        case '-': return a - b;
-        case '*': return a * b;
-        case '/': return a / b;
-        default: return;
+    if(operation == '+'){
+        return a + b;
+    } else if(operation == '-' ){
+        return a - b;
+    }else if(operation == '*' ){
+        return a * b;
+    }else{
+        return a / b;
     }
 };
 
 const expressionCalculator = (expr) => {
-    if (Array.from(expr.matchAll(/\(/g)).length !== Array.from(expr.matchAll(/\)/g)).length) {
-        throw new Error('ExpressionError: Brackets must be paired');
-    }
-    if (expr.includes("/ 0")) {
-        throw new Error("TypeError: Division by zero.");
-    }
-    const priority = { '+': 1, '-': 1, '*': 2, '/': 2, '(': 0, ')': 0 };
-    let nums = [], operations = [];
-    let exprArray = expr.trim().split(/\s+/g);
+    this.priority = { '*': 2, '/': 2,'+': 1, '-': 1, '(': 0, ')': 0 };
+    var nums = [], operations = [];
+    var exprArray = expr.trim().split(/\s+/g);
     if (!expr.includes(" ")) { exprArray = expr.split('') };
-    for (let i=0; i < exprArray.length; i++) {
+    for (var i=0; i < exprArray.length; i++) {
         if ( !isNaN( Number(exprArray[i]) ) ) {     
             nums.push(Number(exprArray[i]));
             continue;
         }
-        let currentOperation = exprArray[i];
-        if ( operations.length == 0 || currentOperation == '(') {   
+        var currentOperation = exprArray[i];
+        if ( currentOperation == '(' || operations.length == 0 ) {   
             operations.push(currentOperation);
             continue;
         }
-        if ( priority[getTop(operations)] < priority[currentOperation] ) {  
+        if ( this.priority[currentOperation]> this.priority[getTop(operations)] ) {  
             operations.push(currentOperation);
             continue;
         }
         while ( true ) {
-            let topoperations = getTop(operations);
-            if ( currentOperation == ')' && topoperations == '(' ) {
+            var topOpers = getTop(operations);
+            if ( topOpers == '(' && currentOperation == ')') {
                 operations.pop();
                 break;
             }
-            if ( topoperations == '(' ) {
+            if ( topOpers == '(' ) {
                 operations.push(currentOperation);
                 break;
             }
-            if ( priority[currentOperation] <= priority[topoperations] ) {
-                let b = nums.pop();
-                let a = nums.pop();
+            if ( this.priority[topOpers] >= this.priority[currentOperation]) {
+                var b = nums.pop();
+                var a = nums.pop();
                 nums.push(calculate(operations.pop(), a, b));
             } else {
                 operations.push(currentOperation);
@@ -62,14 +58,21 @@ const expressionCalculator = (expr) => {
             }
         }
     }
-    for (let i=0; i<=operations.length; i++) {
-        let b = nums.pop();
-        let a = nums.pop();
+    for (var i=0; i<=operations.length; i++) {
+        var b = nums.pop();
+        var a = nums.pop();
         nums.push(calculate(operations.pop(), a, b));
     }
+
+    if (expr.includes("/ 0")) {
+        throw new Error("TypeError: Division by zero.");
+    }
+    if (Array.from(expr.matchAll(/\(/g)).length !== Array.from(expr.matchAll(/\)/g)).length) {
+        throw new Error('ExpressionError: Brackets must be paired');
+    }
+
     return nums[0];
 }
-
 module.exports = {
     expressionCalculator
 }
